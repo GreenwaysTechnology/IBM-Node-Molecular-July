@@ -1,0 +1,858 @@
+ES 6 Features:
+
+javascript language version no ES 6:
+ECMA SCRIPT:  
+ES 1-97,ES 3-99,ES 4-2006, ES 5-2007,ES6-2012-2015....ES 7, ES8,ES 9
+
+js is object based,functional style,event driven pl.
+
+Language fundamentals
+functional programming
+object based programming
+networking-ajax
+UI- DOM
+
+Node js 
+
+//Language fundamentals
+/**
+ * js is dynamic typed language : no type is required to declare variables.
+ * types are identified during runtime only.
+ * types :
+ *  -string - 16 bit unicode character
+ *  -number - size 64 bit - double
+ *  -boolean - size 1 bit
+ *  -undefined
+ *  -function
+ *  -object
+ * values : iterals 
+ *  based on literal only type is identified
+ *  -string
+ *  -number
+ *  -boolean
+ *  -undefined
+ *  -NaN - number : Not a Number : runtime numerical errors
+ *  -infinity : number : div/0
+ *  -function
+ *  -null - object
+ *  -object
+ * variable declaration 
+ *   -var  - old way - es5 style
+ *   -let  -es 6
+ *   -const - es 6
+ *            -----local variables
+ *   -this - old way  - instance variables
+ * 
+ *   
+ * 
+ */
+
+//Language fundamentals
+//advanced booleans.
+/**
+ * in java script everything is true execept the following values
+ * //falsy values
+ * 1.boolean false
+ * 2.0
+ * 3."",'' empty string
+ * 4.NaN 
+ * 5.null
+ * 6.undefined
+ *
+ * control statements && loops
+ *  -if
+ *  -switch..
+ *  - for,while,do..while
+ * operators : 
+ *   1. ==,=== !=,!==
+ *   2. ||  , &&
+ *   3. typeof, new,instanceof....
+ *   4.tenary operator :?
+ * 
+ */
+
+let isActive = true;
+if (isActive) {
+    console.log('Active')
+} else {
+    console.log('Not active')
+}
+//using tenary
+isActive ? console.log('Active') : console.log('Not active');
+
+let start = 0;
+if (start) {
+    console.log('start')
+} else {
+    console.log('Not start')
+}
+
+//equal
+// == , ===
+//== compares only value not type; it is bug
+// === compares type + value : it is recommended
+let x = "10";
+let y = 10;
+x == y ? console.log('EQUAL') : console.log('NOT EQUAL');
+x === y ? console.log('EQUAL') : console.log('NOT EQUAL');
+
+// ||
+
+let isCold = true;
+let haveHeat = true;
+
+isCold || haveHeat ? console.log('infected by COVID-19') : console.log('You are fine')
+
+/**
+ * if first operand(counter)  is truthy, the result would be first operand else 
+ * second operand 
+ */
+
+let counter = 10;
+let totalCounter = counter || 1;
+console.log(`Total Counter ${totalCounter}`);
+
+
+//const keyword
+/**
+ * let means , you can reintialize
+ * const , once declared cant be reinitalized 
+ */
+let a = 10;
+console.log(`a ${a}`)
+a = 90;
+console.log(`a ${a}`)
+
+const x =10;
+console.log(`x ${x}`)
+//x =100
+
+/**
+ * Functional programming
+ *  -how to declare functions 
+ *     -definition pattern
+ *     -literal pattern
+ *     -anonmous functions
+ *  -es 5 functions
+ * -es 6 functions - arrow functions
+ *  
+ * -function declartion properties
+ *    - params and args
+ *    -return values
+ * Note ; function can take any litreal as parameter and return any thing
+ *     -take any value including function.
+ */
+
+//definition pattern : function declaration
+function sayHello() {
+    console.log("hello")
+}
+//function call
+sayHello();
+//paramaters and args
+//a,b are args
+//default args : es 6 feature
+function add(a = 1, b = 1) {
+    let c = a + b;
+    console.log(`Add Result  ${c}`)
+}
+//10,10 are parameters
+add(10, 10)
+//undefined , undefined
+add();
+//return values
+function substract(a = 1, b = 1) {
+    let c = a - b;
+    return c;
+}
+console.log(`Result Substract ${substract(10, 2)}`)
+console.log(`Result Substract ${substract()}`);
+//*************************************************************************************
+//syntax 2 : literal pattern
+/**
+ * let a =10;
+ *  10 literal number
+ * function is literal(value),
+ *  1. can be assigned to a variable
+ *  2. can be passed as parameter to another function
+ *  3. can be returned from another function
+ *  
+ * once a function assinged,passed, returned , can invoked like normal function. 
+ * 
+ * types:
+ *   1.named function
+ *   2.anonmous function /nameless function
+ * 
+  */
+
+// *  1. can be assigned to a variable
+//  *   1.named function
+
+let greeter = function sayGreeter() {
+    console.log('Say Greeter');
+};
+//call a function using a variable
+greeter();
+//2.anonmous function /nameless function
+let hai = function () {
+    console.log('Say Hai');
+};
+hai();
+//parameters and args , returns
+let multiply = function (a = 1, b = 1) {
+    return a * b;
+};
+console.log(multiply(10, 2));
+//////////////////////////////////////////////////////////////////////////////////
+//how to pass function as parameter
+
+//start is just variable
+/**
+ * 
+ * @param {*} start 
+ * start= function () {
+    //function body
+    console.log('Starting......')
+}
+ */
+function connect(start) {
+    //call the function
+    let status = start('HttpServer');
+    status ? console.log('Server is Ready to Accept Requests') : console.log('Server is Failed!')
+}
+//passing anonmous function
+connect(function (param) {
+    //function body
+    console.log(`${param} Starting......`)
+    return true;
+});
+
+//
+let connector = function (start) {
+    //call the function
+    let status = start('TCP Server');
+    status ? console.log('Server is Ready to Accept Requests') : console.log('Server is Failed!')
+};
+connector(function (param) {
+    //function body
+    console.log(`${param} Starting......`)
+    return true;
+});
+/////////////////////////////////////////////////////////////////////////////////
+//Returnning function from another
+
+// function counter() {
+//     function inc() {
+//         console.log('inc')
+//     }
+//     //
+//     inc();
+// }
+// function counter() {
+//     return function inc() {
+//         console.log('inc')
+//     };
+// }
+function counter() {
+    return function () {
+         console.log('inc');
+    };
+}
+let increment = counter();
+increment();
+//short cut
+counter()();
+
+
+
+
+//es 6 function literal ; arrow function
+
+/**
+ * why arrow
+ *  1.syntax simple
+ */
+//old way
+let hai = function () {
+    console.log('Hai');
+};
+hai();
+let hi = () => {
+    console.log('Hai');
+};
+hi();
+//flavours of arrows
+//1. if function has single line of body, remove {}
+let newHai = () => console.log('Hai');
+newHai();
+
+//2.with args and parameters : multi parameters with default args
+let add = (a = 1, b = 2) => {
+    let result = a + b;
+    console.log(`Result is ${result}`);
+}
+add(10, 10);
+//2.with args and parameters : single parameters without  default args :drop ()
+let stock = value => console.log(`Value ${value}`);
+stock(100);
+
+//3 return values : with body
+let substract = (a = 1, b = 2) => {
+    let result = a - b;
+    return `Result is ${result}`;
+};
+console.log(`Result is ${substract(12, 89)}`);
+
+//4.only return , no body , drop {} and return statement
+let getValue = () => 10;
+console.log(getValue())
+//get value ,no default args, return the same 
+let setAndGetValue = value => value;
+console.log(setAndGetValue(100));
+//************************
+//function as parameter
+let connect = start => start('HTTP SERVER');
+connect(param => console.log(`${param} is starting....`));
+
+//return function as parameter
+let counter = () => () => console.log('inc')
+counter()()
+**********************************************************************************************
+
+
+
+//How to create object?
+/**
+ * 1.constructor pattern
+ *    es 5 functions as class
+ *    es 6 classes
+ * 2.literal pattern
+ *   
+ */
+
+function Employee(id = 1, name = 'default') {
+    //state, behaviour
+    this.id = id; //1;
+    this.name = name;//'Subramanian';
+    //mehtods
+    this.calculate = function () {
+        return 1000;
+    }
+
+}
+//emp is reference variable , new is keyword to create  object , 
+//Employee() constructor call.
+let emp = new Employee(12, 'Subramanian');
+//emp.id = 9000;
+console.log(`${emp.id} ${emp.name} ${emp.calculate()}`)
+
+
+class Customer {
+    //state, behaviour
+    id = 1;
+    name = 'Subramanian';
+    constructor(id = 1, name = 'Subramanian') {
+        this.id = id;
+        this.name = name;
+    }
+    //mehtods
+    // calculate = function () {
+    //     return 1000;
+    // }
+    calculate() {
+        return 1000;
+    }
+
+}
+let cust = new Customer(23, 'Ram');
+cust.id = 8888;
+console.log(`${cust.id} ${cust.name} ${cust.calculate()}`)
+
+//literal pattern : no class,function
+
+let order = {
+    id: 1,
+    name: 'Computers',
+    qty: 100,
+    price: 100,
+    inStock: true,
+    calculate: function () {
+        return this.qty * this.price
+    },
+    //arrow
+    calculateCost: () => {
+        //kindly refer this keyword inside arrow : this keyword inside is different 
+        //meaning
+        return order.qty * order.price
+    },
+    // es 6 class pattern
+    calculateNewCost() {
+        return this.qty * this.qty;
+    }
+
+}
+console.log(order.calculate(), order.calculateCost(), order.calculateNewCost())
+
+
+
+
+//object destructuring:
+
+//without destructring
+function display(employee) {
+    //log all details
+    console.log(`Id ${employee.id}`)
+    console.log(`Name ${employee.name}`)
+    console.log(`City ${employee.city}`)
+    console.log(`State ${employee.state}`)
+}
+function display1(employee) {
+    //extract object properties
+    const { id, name, city, state } = employee;
+    //log all details
+    console.log(`Id ${id}`)
+    console.log(`Name ${name}`)
+    console.log(`City ${city}`)
+    console.log(`State ${state}`)
+
+}
+
+//extract object properties
+function display2({ id, name, city, state }) {
+    //log all details
+    console.log(`Id ${id}`)
+    console.log(`Name ${name}`)
+    console.log(`City ${city}`)
+    console.log(`State ${state}`)
+
+}
+const displayArrow = ({ id, name, city, state }) => {
+    //log all details
+    console.log(`Id ${id}`)
+    console.log(`Name ${name}`)
+    console.log(`City ${city}`)
+    console.log(`State ${state}`)
+
+};
+
+display({ id: 1, name: 'Subramanian', city: 'Coimbatore', state: 'Tamil Nadu' });
+display1({ id: 1, name: 'Subramanian', city: 'Coimbatore', state: 'Tamil Nadu' });
+display2({ id: 1, name: 'Subramanian', city: 'Coimbatore', state: 'Tamil Nadu' });
+displayArrow({ id: 1, name: 'Subramanian', city: 'Coimbatore', state: 'Tamil Nadu' });
+
+// //
+// function getStock(id = 1, symbol = 'google', price = 100) {
+//     // return {
+//     //     id: id,
+//     //     symbol: symbol,
+//     //     price: price
+//     // };
+//     //key:value ===same => remove one
+//     return {
+//         id,
+//         symbol,
+//         price
+//     };
+// }
+// //
+// const getStock=(id = 1, symbol = 'google', price = 100) => {
+//     return {
+//         id,
+//         symbol,
+//         price
+//     };
+// };
+
+const getStock = (id = 1, symbol = 'google', price = 100) => ({
+    id,
+    symbol,
+    price
+});
+
+console.log(getStock())
+
+
+*********************************************************************************************
+
+Node.js:
+
+What is Node?
+  
+ Node is javascript runtime and platform to run javascript programs standalone manner.
+
+javascript is language , its runtime embeded inside every browser.
+
+2008,Ryan Dhal, who invented a model how to run javascript outside browser : Node.js
+
+Google , when they started chrome project, google announched javascript will be open source.
+Chrom js runtime called "v8".
+
+What is V8?
+V8 is Google’s open source high-performance JavaScript and WebAssembly engine, written in C++. It is used in Chrome and in Node.js, among others.
+
+Node js created out of V8.
+
+V8 was released for chrome browser for high performance javascript at browsers.
+
+Node js was born to build "network applications by using "
+
+ -non blocking / async programming : async io
+
+Why Node.js
+
+ - to build high performance network applications using min resources
+
+*****************************************************************************************
+
+Architure of Node.js:
+....................
+
+Blocking and sync programming:
+..............................
+
+Concurrency:
+     -doing many things at same : parrel programming : 
+           -multi process ,mutltithreading
+
+Types of threading:
+
+ -Process level concurrency.
+        Creating and running, managing threads at process level : legacy model
+
+ -Worker thread model concurrency.
+
+
+-Process level concurrency. : Blocking and sync.
+////////////////////////////////////////////////
+        Creating and running, managing threads at process level : legacy model
+
+Use case java:web stack
+
+tomcat  =  http + jvm
+
+Client             Tomcat
+req1------------create/allocate new thread----do insentive io operation-->1 gb file
+req2-----------create/allocate new thread ----read database records
+req3-----------create/allocate new thread---simple html
+
+Drawbacks:
+
+1.more threads, performance issue
+2.it leads , thread issues like race condition,deadlock.....
+
+Solution:
+  isloate thread creation,running,managing outside 
+
+Worker thread model concurrency.
+
+
+--based on design pattern : Reactor Pattern
+*********************************************************************************************
+
+Node is just js runtime, like browser runtime.
+
+Application of node:
+
+async/nonblocking
+1.buliding web apps
+2.building high file io applications
+3.socket programming
+.......
+**********************************************************************************************
+
+node runtime has two mode
+
+1.REPL model - Read Evaluate Print loop.
+  to run js code with out writing. for interactive command line tool.
+
+2.node command 
+
+   node jscode.js
+
+Objects in node:
+
+in browser :
+ window,document,history,location --dom objects ; not available in node.
+
+in browser window is super object, in node process is the super object
+*****************************************************************************************
+
+Node Progrm stack:
+
+1.node application modularity
+2.node api
+3.node - io apis
+  -web, app,fs
+4.node package manager -npm.
+*******************************************************************************************
+
+js modularity :
+
+modularity : breaking application , sharing code across the files.
+
+java : packages, import 
+
+by default js provides file based modularity, file linking. 
+
+even today js is very weak in modualrity.
+
+In 2000 js community, started working on modualrity js.
+
+proposed lot of design patterns: modular design patterns.
+
+1.javascript namespace design pattern : - 1st - jquery 
+2.amd -asyn module defintion
+3.cjs - common js - even today this design pattern is avilable
+   note; node.js was designed with commonjs by default.
+4.es 6 modules- es6
+5.system 
+6.UMD -unversial module definition
+
+cjs,es6
+.......
+
+commonjs implementation:
+
+1.node popularized this design pattern
+2.node uses this design pattern by default.
+
+
+Common objective of theses design patterns
+
+1.how to link files
+2.how to share code among files.
+
+cjs and node
+
+1.how to link files
+   require()
+    it is function, used to link files
+  require functions retuns code either in the form object or other.
+
+2.sharing code 
+   exports
+   module.exports
+
+
+
+use case 1: just link files
+
+mylib.js
+
+
+console.log('mylib');
+
+index.js
+require('./mylib')
+
+
+use case 1: just link files and share code
+
+code:
+ could be any thing we declare
+ variable having - string,number,boolean,object,function.....
+ function
+ class
+ object
+ array
+.......
+
+exports
+
+exports.id = 1;
+
+ what  is exports
+ what is id 
+ what is 1
+
+exports is just variable and its value is literal object by default.
+
+if you want understand exports, you have to understand js concept called "Object Augmenation"
+
+//Object augmentation:
+//object memory layout
+/**
+ * object is memory having key : value pair structure : hash table/ dictionary
+ *  yes every object in js is simple dictionary/map
+ * note: since object is map, you can perform curd operation on object.
+ *  -add,delete,update,iterate,search
+ *      - Object augmentation
+ */
+
+
+let emp = {
+    id: 1
+};
+ //here only 1 property has been declared
+console.log(emp.id)
+//add operations
+emp.firstName = 'Subramanian' //setter
+console.log(emp.firstName) //getter
+
+//update : if prop exits, then update, else add
+emp.firstName = 'John'
+console.log(emp.firstName) //getter
+
+emp.salary =9000;
+console.log(emp.salary) //getter
+
+//delete
+delete emp.salary;
+console.log(emp.salary) //getter
+
+//iteration
+for (const key in emp) {
+  console.log(key,emp[key])
+}
+
+
+************************************
+
+
+syntax  for require function
+
+ function require(fileName){
+   let exports={};
+
+
+   return exports ;          
+
+ }
+
+let result= require('./mylib')
+
+
+
+mylib.js
+
+
+//sharing code via exports
+/**
+ * 
+ function require(fileName){
+   let exports={};
+   //augmentation
+   exports.firstName ='Subramanian'
+   exports.firstName = 'Subramanian'
+  exports.lastName = 'Murugan';
+  exports.id = 1;
+  exports.isActive = true;
+exports.checkStatus = function () {
+    return 'Available'
+}
+exports.address = {
+    city: 'Coimbatore'
+}
+exports.skills = ['java', 'javascript'];
+   return exports ;          
+
+ }
+
+let result= require('./mylib')
+ */
+
+exports.firstName = 'Subramanian'
+exports.lastName = 'Murugan';
+exports.id = 1;
+exports.isActive = true;
+exports.checkStatus = function () {
+    return 'Available'
+}
+exports.address = {
+    city: 'Coimbatore'
+}
+exports.skills = ['java', 'javascript'];
+
+index.js
+//let result = require('./mylib');
+
+const { firstName, lastName, id, isActive,checkStatus } = require('./mylib');
+//console.log(result.firstName,result.lastName);
+
+console.log(`${id} ${firstName} ${lastName}  ${isActive} `);
+console.log(`${checkStatus()}`)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
