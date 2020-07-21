@@ -1,7 +1,17 @@
-//let result = require('./mylib');
+const fs = require('fs');
+const path = require('path');
 
-const { firstName, lastName, id, isActive,checkStatus } = require('./lib/mylib');
-//console.log(result.firstName,result.lastName);
+const inputfileName = path.join(__dirname, 'assets/big.file');
+const outputfileName = path.join(__dirname, 'assets/big_copy.file');
 
-console.log(`${id} ${firstName} ${lastName}  ${isActive} `);
-console.log(`${checkStatus()}`)
+const config = {
+      encoding: 'UTF-8'
+}
+
+//Back pressure handling
+const readerStream = fs.createReadStream(inputfileName, config);
+const writeStr = fs.createWriteStream(outputfileName, config);
+
+//backPressure streams
+//pipe method is simplest method which wraps resume,pasuse,drain 
+readerStream.pipe(writeStr);

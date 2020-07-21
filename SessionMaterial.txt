@@ -772,65 +772,1329 @@ const { firstName, lastName, id, isActive,checkStatus } = require('./mylib');
 console.log(`${id} ${firstName} ${lastName}  ${isActive} `);
 console.log(`${checkStatus()}`)
 
+******************************************************************************************
+module.exports:
+   -module.exports does not return object.
+   -it exports the code as it is- if you return variable it returns variable
+   -require function wont get as object.
+   -you cant have more than one module.exports in a single file.
+
+
+
+
+
+let name = require('./lib/name');
+let adder = require('./lib/add');
+
+console.log(name);
+console.log(adder(12,90));
+
+src/lib/add.js
+
+
+function add(a = 1, b = 2) {
+    return a + b;
+}
+
+module.exports = add;
+
+
+//declare single name
+
+const name = 'Subramanian';
+
+//export it
+module.exports = name;
+
+let name = require('./lib/name');
+let adder = require('./lib/add');
+
+console.log(name);
+console.log(adder(12,90));
 
 
 
 
 
 
+class TodoRepository{
+    constructor(){
+        console.log('TODO Repository')
+    }
+    //method
+    findAll(){
+        return 'Todo repository-Repository'
+    }
+}
+module.exports = TodoRepository;
+
+const TodoRepository = require('../respository/TodoRepository');
+
+class TodoService {
+    todoRepository = null;
+    constructor() {
+        console.log('TodoService')
+        this.todoRepository = new TodoRepository();
+    }
+    findAll() {
+        return this.todoRepository.findAll();
+    }
+}
+module.exports = TodoService;
+
+const TodoService = require('../services/TodoService');
+
+class TodoController {
+    todoService = null;
+    constructor() {
+        console.log('TodoController')
+        this.todoService = new TodoService();
+    }
+    findAll() {
+        return this.todoService.findAll();
+    }
+}
+module.exports = TodoController;
+
+
+const TodoController = require('./controller/TodoController');
+
+
+function start(){
+
+    const todoCtrl= new TodoController();
+    console.log(todoCtrl.findAll())
+
+}
+start();
+*********************************************************************************************
+Node js:
+
+-nonblocking and async:
+
+async programming:
+
+1.node(js) provides a high level async apis
+
+common java script apis(browsers):
+..................................
+1.timers
+   settimeout,setinterval
+2.ajax api -only in browser
+   xhr.
+3.websocket api - in browser and in node.
+4.all dom events api -only browser
+
+Node apis:
+ node offers 90% api non blocking - io,networking,web.....
+http,fs,tcp.......
+
+
+2.you need to pass functions as parameter to async api
+   -handler function /callback function : to handle completed async result
+
+timers   
+
+1.timers
+   settimeout,setinterval
+
+
+
+Style/patterns of async programming
+...................................
+
+1.callback pattern
+2.promise pattern
+3.async...await patterns
+
+
+/**
+ * Async programming :
+ *  timer api
+ *    -setTimeout
+ *       -if you want to schedule any task in delayed manner using cpu timer.
+ *        once timeout is completed, handler function will be ready to handle result
+ */
+
+function delay(handler) {
+    let fakeData = "Hello!How areyou"
+    //timer logic
+    setTimeout(handler, 5000, fakeData);
+}
+
+console.log('start')
+delay(function (data) {
+    console.log(`${data}`)
+});
+console.log('stop');
+
+//arrow version
+
+const { log } = console;
+const sleep = callback => {
+    let fakeData = 'Awaken!!'
+    setTimeout(callback, 6000, fakeData);
+};
+sleep(data => console.log(data));
+//with object destrucing
+sleep(log);
+
+**********************************************************************************************
+
+const TodoService = require('./api/TodoService');
+
+
+//Access todo app
+let todoService = new TodoService();
+//sync call
+function syncCall() {
+    console.log('start todo')
+    console.log(todoService.findAllSync());
+    console.log('end todo')
+}
+//syncCall()
+
+function asyncCall() {
+    console.log('start todo')
+    
+    todoService.findAllAsync(todos => {
+        console.log(todos);
+    });
+    console.log('end todo')
+
+}
+asyncCall();
+
+const TODOS = require('../data/todos')
+
+class TodoService {
+    constructor() {
+
+    }
+    findAllSync() {
+        return JSON.stringify(TODOS);
+    }
+    //i want to return todos async
+    findAllAsync(handler) {
+        //todos data will be returned after 5sec
+        setTimeout(handler, 5000, TODOS)
+    }
+
+
+}
+module.exports = TodoService;
+
+**************************************************************************************
+
+Callback nesting: // nested callbacks:
+ .....................................
+
+  The out put of one callback, will be input to another callback.
+
+
+if you request something, the out put would be either data or error.
+
+//callback nesting
+
+/**
+ * how to pass two callbacks, 
+ *  -one is going to handle - success -resolve
+ *  -another one is going to handler - failure-reject
+ */
+const { log } = console;
+
+const getUser = (resolve, reject) => {
+    //biz logic to simulate success and failure
+    let user = {
+        id: 1,
+        name: 'admin'
+    };
+    let err = {
+        code: 500,
+        message: 'User not Found!!'
+    }
+
+    if (user) {
+        setTimeout(resolve, 1000, user);
+    } else {
+        setTimeout(reject, 1000, err);
+    }
+
+};
+
+//login method takes 3 args -  user,resolve,reject
+
+const login = (user, resolve, reject) => {
+    //biz logic
+    const SUCCESS = 'Login success';
+    const FAILURE = 'Login Failed';
+    if (user.name === 'admin') {
+        setTimeout(resolve, 1000, SUCCESS)
+    } else {
+        setTimeout(reject, 1000, FAILURE);
+    }
+
+};
+
+
+// getUser(user => {
+//     //nesting 
+//     log('User is called')
+//     login(user, success => {
+//         log(success);
+//     }, failure => {
+//         log(failure);
+//     });
+// }, err => {
+//     log(err);
+// });
+getUser(user => {
+    //nesting 
+    log('User is called')
+    login(user, log, log);
+}, log);
+
+callback hell:
+..............
+
+look at the above function call, ask your self
+
+Questions:
+
+1.Whether this code is able to understand quickly
+2.Whether this code is able to debug
+3.Whehter this code is scalable?
+4.whether this code is maintaiable?
+
+  "No" : This is what we call as "Callback hell"
+
+Callback hell is not error, but way of writing async programming using nested callback.
+
+
+fs.readdir(source, function (err, files) {
+  if (err) {
+    console.log('Error finding files: ' + err)
+  } else {
+    files.forEach(function (filename, fileIndex) {
+      console.log(filename)
+      gm(source + filename).size(function (err, values) {
+        if (err) {
+          console.log('Error identifying file size: ' + err)
+        } else {
+          console.log(filename + ' : ' + values)
+          aspect = (values.width / values.height)
+          widths.forEach(function (width, widthIndex) {
+            height = Math.round(width / aspect)
+            console.log('resizing ' + filename + 'to ' + height + 'x' + height)
+            this.resize(width, height).write(dest + 'w' + width + '_' + filename, function(err) {
+              if (err) console.log('Error writing file: ' + err)
+            })
+          }.bind(this))
+        }
+      })
+    })
+  }
+})
+
+How to write better callback programming? or How to avoid callback hell?
+
+Solution : One Design pattern is 
+
+
+In 2005, JQUERY team started with working complex callback patterns, they found callback
+hell problem.
+
+They proposed a  Design pattern to write better callback programming(Async) programming.
+
+  "promise".
+
+
+Promise is design pattern which hides complexity of callback patterns.
+
+SInce Promise is design pattern, many people have implemented Promise design pattern.
+
+1.JQuery -first promise implementation
+2.many libs and frameworks
+
+Because of popularty of this design among javascript developers, ECMA 6 Committee introduced
+"promise design pattern in ES6 as Promise Object"
+
+Promise Object is reference implementation of "promise design pattern".
+
+
+Js has lot of built in objects
+
+Object
+Wrapper Objects: Number,String,Boolean
+Math
+Date
+JSON --Parser Object
+Promise
+
+features of Promise Object:
+.............................
+
+1.Promise by deafult is Async. Which implements timer api with 0 ms .
+
+2.Promise can be used with any async callback implementations.
+
+
+Promise Implemenation / Promise Objects:
+........................................
+
+1. Create Promise Object from Promise contructor
+        new Promise()
+2. Create Promise object from factory apis
+   ClassName.getInstance()===Object
+	Promise.resolve() ==>Promise
+        Promise.reject() ===>Promise
 
 
 
 
+Promise object methods:
+1.then - success
+2.catch - errors
+3.finally - clean up
+4.resolve
+5.reject
+6.all
+7.race
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+                   When to use factory api and when to use constructor 
+				to create Promise Object
 
 
 
 
+//Promise implementation:
+/**
+ * 1.Promise is object is created in two ways
+ *  -factory methods
+ *     resolve
+ *     reject
+ *  -constructors
+ *    new Promise()
+ * Promise by default is async, it uses setTimeout with 0ms
+ */
+
+//callback 
+// function delay(handler) {
+//     let fakeData = "Hello!How areyou"
+//     //timer logic
+//     setTimeout(handler, 5000, fakeData);
+// }
+
+// console.log('start')
+// delay(function (data) {
+//     console.log(`${data}`)
+// });
+// console.log('stop');
+
+function delay() {
+    let fakeData = "Hello Promise";
+    //return promise only
+    //  setTimeout(handler, 0, fakeData);
+    return Promise.resolve(fakeData); //new Promise Object with success 
+}
+
+console.log('start')
+delay().then(data => console.log(data));
+console.log('stop');
+
+
+function delayWithError() {
+    let fakerError = "boom!!";
+    //return promise only
+    //  setTimeout(handler, 0, fakeData);
+    return Promise.reject(fakerError); //new Promise Object with Error 
+}
+delayWithError().catch(err => console.log(err));
+
+//with biz logic  , resolve and reject
+
+function delayWithBiz() {
+    let user = {
+        id: 1,
+        name: 'admin'
+    };
+    let error = {
+        code: 500,
+        message: 'boom!! No User found'
+    }
+    if (user) {
+        return Promise.resolve(user)
+    }
+    return Promise.reject(error);
+}
+delayWithBiz()
+    .then(user => console.log(user))
+    .catch(err => console.log(err))
+    .finally(() => console.log('done!!!!'))
+////////////////////////////////////////////////////////////////////////////////////
+//Promise Constructor pattern
+
+function getPromiseWithMoreDelay() {
+
+    return new Promise((resolve, reject) => {
+        let user = {
+            id: 1,
+            name: 'admin'
+        };
+        let error = {
+            code: 500,
+            message: 'boom!! No User found'
+        }
+        if (user) {
+            setTimeout(resolve, 5000, user);
+        } else {
+            setTimeout(reject, 5000, error);
+
+        }
+
+    });
+}
+
+getPromiseWithMoreDelay()
+    .then(user => console.log(user))
+    .catch(err => console.log(err))
+    .finally(() => console.log('done!!!!'))
+
+
+//how to refactor callback nesting using promise; how to avoid callback hell.
+
+const { log } = console;
+
+const getUser = () => {
+    return new Promise((resolve, reject) => {
+        let user = {
+            id: 1,
+            name: 'admin'
+        };
+        let err = {
+            code: 500,
+            message: 'User not Found!!'
+        }
+
+        if (user) {
+            setTimeout(resolve, 1000, user);
+        } else {
+            setTimeout(reject, 1000, err);
+        }
+    })
+
+};
+
+//login method takes 3 args -  user
+
+const login = user => {
+    //biz logic
+    return new Promise((resolve, reject) => {
+        const SUCCESS = 'Login success';
+        const FAILURE = 'Login Failed';
+        if (user.name === 'admin') {
+            setTimeout(resolve, 1000, SUCCESS)
+        } else {
+            setTimeout(reject, 1000, FAILURE);
+        }
+    })
+
+};
+
+//callback hell
+// getUser(user => {
+//     //nesting 
+//     log('User is called')
+//     login(user, success => {
+//         log(success);
+//     }, failure => {
+//         log(failure);
+//     });
+// }, err => {
+//     log(err);
+// });
+
+//callback hell solution : promise
+//way -1
+
+getUser()
+    .then(user => {
+        login(user)
+            .then(status => {
+                console.log(status);
+            })
+            .catch(err => console.log(err))
+    })
+    .catch(err => console.log(err))
+    .finally(() => console.log('done!!'))
+
+//way 2
+getUser()
+    .then(user => {
+        return login(user)
+    })
+    .then(status => console.log(status))
+    .catch(err => console.log(err))
+    .finally(() => console.log('done!!'))
+
+//way 2.1
+getUser()
+    .then(user => login(user))
+    .then(status => console.log(status))
+    .catch(err => console.log(err))
+    .finally(() => console.log('done!!'))
+//way 2.2
+getUser()
+    .then(user => login(user))
+    .then(log)
+    .catch(log)
+    .finally(() => console.log('done!!'))
+
+// getUser(user => {
+//     //nesting 
+//     log('User is called')
+//     login(user, log, log);
+// }, log);
+**********************************************************************************************
+
+
+getUser()
+    .then(user => login(user))
+    .then(status => console.log(status))
+    .catch(err => console.log(err))
+    .finally(() => console.log('done!!'))
+//way 2.2
+getUser()
+    .then(user => login(user))
+    .then(log)
+    .catch(log)
+    .finally(() => console.log('done!!'))
+
+
+Questions:
+
+1.Whether this code is able to understand quickly
+2.Whether this code is able to debug
+3.Whehter this code is scalable?
+4.whether this code is maintaiable?
+
+ "Problem" : Promise Hell.
+
+Solution : ES 7 Introduced  how to handle promises from callerside :
+
+  -async .... await  => keywords makes promise handling simpilar like sync calls.
+
+
+Callee                                     Caller
+
+returns Promise                             then..catch
+
+returns Promise                             async await..
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+1.async functions
+
+
+/**
+ * async function
+ *   -it is normal function only , returns promise.resolve by default
+ */
+
+// function getData(){
+//     return Promise.resolve('Hello');
+// }
+//async function
+async function getData() {
+    return 'Hello'; //Promise.resolve('Hello');
+}
+getData().then(data => console.log(data));
+
+//resolve,reject
+async function getDataWithLogic() {
+    let user = {
+        id: 1,
+        name: 'admin'
+    }
+    if (user) {
+        return user;
+    } else {
+        Promise.reject({ code: 500, message: 'User not found!' })
+    }
+}
+getDataWithLogic()
+    .then(data => console.log(data))
+    .catch(err => console.log(err))
+/////////////////////////////////////////////////////////////////////////////////
+//callee
+const getUser = () => {
+    return new Promise((resolve, reject) => {
+        let user = null;
+        let err = {
+            code: 500,
+            message: 'User not Found!!'
+        }
+
+        if (user) {
+            setTimeout(resolve, 1000, user);
+        } else {
+            setTimeout(reject, 1000, err);
+        }
+    })
+
+};
+
+//caller
+async function caller() {
+    // getUser()
+    // .then(data => console.log(data))
+    // .catch(err => console.log(err))
+    try {
+        let user = await getUser();
+        console.log(user);
+    }
+    catch (err) {
+        console.log(err);
+    }
+    finally {
+        console.log('done!!');
+    }
+}
+caller()
+*********************************************************************************************
+
+node modules:
+
+types of node modules:
+
+1.custom node modules -  discussed
+2.built in modules
+3.thrid party modules
+
+
+
+built in modules:
+
+ node provides lot of built node modules for building node applications.
+
+note: any module , at end js only.
+
+basic nodules
+
+1.os
+2.event emitter
+3.io modules
+  -fs
+  -http
+
+os : operating system.
+
+//os module
+
+const { arch,cpus } = require('os') // os.js
+
+console.log(arch())
+console.log(cpus())
+//////////////////////////////////////////////////////////////////////////////////////////////
+node_modules folder:
+....................
+
+ require('./OrderRepository');
+  ->here you can see ./
+  ./ -current dir
+ require('os'); => 
+  -here no ./ 
+ 
+Why?
+
+Note : if you are java dev, you know the classpath , how it works?
+
+
+require('os');
+ if you dont tell with './'
+
+    Node internally uses a search algorthim,node always looks the folder called
+ "node_modules" in the current project, if not , then it searches, the node in built installtion folder---c:/pf/node/node_nodules--if it finds it will pick up from there else it will throw error.
+
+internal/modules/cjs/loader.js:800
+    throw err;
+    ^
+
+Error: Cannot find module 'osxx'
+Require stack:
+- C:\session\ibm\july\nodems\mynode-apps\src\index.js
+[90m    at Function.Module._resolveFilename (internal/modules/cjs/loader.js:797:15)[39m
+[90m    at Function.Module._load (internal/modules/cjs/loader.js:690:27)[39m
+[90m    at Module.require (internal/modules/cjs/loader.js:852:19)[39m
+[90m    at require (internal/modules/cjs/helpers.js:74:18)[39m
+    at Object.<anonymous> (C:\session\ibm\july\nodems\mynode-apps\src\index.js:3:23)
+[90m    at Module._compile (internal/modules/cjs/loader.js:959:30)[39m
+[90m    at Object.Module._extensions..js (internal/modules/cjs/loader.js:995:10)[39m
+[90m    at Module.load (internal/modules/cjs/loader.js:815:32)[39m
+[90m    at Function.Module._load (internal/modules/cjs/loader.js:727:14)[39m
+[90m    at Function.Module.runMain (internal/modules/cjs/loader.js:1047:10)[39m {
+  code: [32m'MODULE_NOT_FOUND'[39m,
+  requireStack: [ [32m'C:\\session\\ibm\\july\\nodems\\mynode-apps\\src\\index.js'[39m ]
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+Event Emitter:
+
+ It is used to build driven programming.
+ In node js most io applications are event driven.
+
+Here we are going to talk how to write custom events.
 
 
 
 
+//Event driven programming ; using events module
+
+const EventEmitter = require('events');
+
+//Create Event object
+const events = new EventEmitter();
+
+//subscriber
+events.on('hello', data => {
+    console.log(data);
+});
+
+//publisher
+function producer() {
+    //emit /send event to subscribers
+    events.emit('hello', 'Hello!!!');
+}
+producer();
+//////////////////////////////////////////////////////////////////////////////
+
+//domain class
+class OrderService extends EventEmitter {
+    constructor() {
+        super();
+        this.on('orderCreated', order => console.log(order))
+    }
+    //methods
+    sale(order) {
+        //when ever sale is called
+        this.emit('orderCreated', order);
+    }
+}
+
+let orderService = new OrderService();
+
+setTimeout(() => {
+    orderService.sale({ id: 1, produt: 'A', price: 9000 });
+}, 1000)
+
+********************************************************************************************
+IO: Non blocking:
+//file system io
+const fs = require('fs');
+
+//read file : non blocking
+
+const filePath = './src/assets/info.txt';
+const options = {
+    encoding: 'UTF-8'
+};
+const handler = function (err, data) {
+    if (err) throw err;
+    console.log(data);
+};
+console.log('start')
+fs.readFile(filePath, options, handler);
+
+//inline hander
+fs.readFile(filePath, options, (err, data) => {
+    if (err) throw err;
+    console.log(data);
+});
+
+console.log('end');
 
 
 
+const FileService = require('./api/FileService');
+
+
+let fileService = new FileService();
+
+async function readTextFile() {
+    //read File 
+    fileService.readFile(data => console.log(data));
+    //promise pattern
+    fileService.readFilePromise()
+        .then(data => console.log(data))
+        .catch(err => console.log(err))
+
+    try {
+        let data = await fileService.readFilePromise();
+        console.log('Await result' + data);
+    }
+    catch (err) {
+        console.log(err);
+    }
+
+}
+readTextFile();
+
+
+const fs = require('fs');
+
+class FileService {
+    constructor() {
+
+    }
+    //callback pattern
+    readFile(handler) {
+        const filePath = './src/assets/info.txt';
+        const options = {
+            encoding: 'UTF-8'
+        };
+        fs.readFile(filePath, options, (err, data) => {
+            if (err) throw err;
+            //  console.log(data);
+            handler(data);
+        });
+    }
+    //Promise pattern
+    readFilePromise() {
+        return new  Promise((resolve, reject) => {
+            const filePath = './src/assets/info.txt';
+            const options = {
+                encoding: 'UTF-8'
+            };
+            fs.readFile(filePath, options, (err, data) => {
+                if (err) {
+                    reject(err);
+                }
+                //  console.log(data);
+                resolve(data);
+            });
+        });
+    }
+}
+module.exports = FileService;
+
+
+******************************************************************************************
+
+how to write file
+
+//fs.js : non block io
+const fs = require('fs');
+
+//write file
+const writeFilepath = './src/assets/info-copy.txt';
+
+const data = 'This is node IO file!';
+
+console.log('start')
+
+fs.writeFile(writeFilepath, data, function (err) {
+    if (err) throw err;
+    console.info(`The file ${writeFilepath} has been written!`)
+});
+console.log('end')
+********************************************************************************************
+
+Does node support blocking IO?
+
+   Blocking io means , io operations are handled by node itself, not os kernal threads.
+
+Node supports some what blocking io.
+
+Node's libuv offers thread pools for handling blocking ios.
+
+Note : dont over use blocking io.
+
+Node blocking io Operations:
+.........................
+
+fs.readFileSync()
+fs.writeFileSync()
+
+const fs = require('fs');
+
+const filePath = './src/assets/info.txt';
+const config = {
+    encoding: 'UTF-8'
+}
+
+console.log('start');
+const data = fs.readFileSync(filePath, config);
+console.log(data);
+console.log('end')
+
+********************************************************************************************
+
+Global Variables:
+
+1.__dirname
+      ->Get current dir path
+2.__filename
+     ->Get current dir + path__filename
+     ->Get current dir + path
+
+path module
+The path module provides utilities for working with file and directory paths in platform
+independant way.
+
+const fs = require('fs');
+const path = require('path');
+
+  
+//file system io
+const fs = require('fs');
+const path = require('path');
+
+
+//read file : non blocking
+
+//const filePath = './src/assets/info.txt';
+const filePath = path.join(__dirname,'assets/info.txt');
+const options = {
+    encoding: 'UTF-8'
+};
+const handler = function (err, data) {
+    if (err) throw err;
+    console.log(data);
+};
+console.log('start')
+fs.readFile(filePath, options, handler);
+
+//inline hander
+fs.readFile(filePath, options, (err, data) => {
+    if (err) throw err;
+    console.log(data);
+});
+
+console.log('end');
+*********************************************************************************************
+IO Streaming:
+............
+Evented IO :  Event driven io.
+..............................
+
+Async io operations can be done two ways.
+
+1.Non-Streaming
+2.Streaming  : Evented IO : Event driven IO.
+
+Non Streaming IO : read / write
+
+non streaming vs streaming:
+
+ The operating system completes the whole file read operation, sends to node process memory  , and finally will be delivered to user
+  if more files , then process will be halt.
+
+Non streaming apis are not suitable for network concurrent file operations.
+
+
+non streaming file apis
+
+ fs.readFile
+ fs.writeFile
+ etc.....
+
+Solution : Stream file apis:
+...........................
+
+
+Packet===breaking content into smaller units each unit is called packet.
+
+node breaks content into smaller unit called "chunk"
+node streams /send data in order chunk by chunk.
+
+
+Types of Streams:
+
+1.Readaable Stream : input
+2.Writeable stream : output
+3.Duplex stream : read + output
+
+
+Built in readable Streams:
+
+HTTP responses, on the client
+HTTP requests, on the server
+fs read streams
+zlib streams
+crypto streams
+TCP sockets
+child process stdout and stderr
+process.stdin
+
+Writable Streams:
+
+HTTP requests, on the client
+HTTP responses, on the server
+fs write streams
+zlib streams
+crypto streams
+TCP sockets
+child process stdin
+process.stdout, process.stderr
+
+All streaming apis are powered with events
+node io streams has built in events.
+events are emitted by node.
+Our programs are listeners
+
+
+Streams and Events:
+
+ emitters are os
+ listerners are our programs
+
+on method : use for listening io events
+emit---we dnt use
+
+common events in all io
+
+data event:
+ which is emitted by node, for each chunk.
+
+close event:
+  The 'close' event is emitted when the stream and any of its underlying resources (a file descriptor, for example) have been closed.
+
+end event:
+The 'end' event is emitted when there is no more data to be consumed from the stream.
+
+Event: 'error'
+ The 'error' event may be emitted by a Readable implementation at any time
+Typically, this may occur if the underlying stream is unable to generate data due to an underlying internal failure, or when a stream implementation attempts to push an invalid chunk of data.
+
+//how to read /write file using streams
+//streams are powered events : evented io
+const fs = require('fs')
+const path = require('path');
+const { log } = console;
+
+const fileName = path.join(__dirname, 'assets/info.txt');
+const config = {
+    encoding: 'UTF-8'
+}
+
+const fs = require('fs')
+const path = require('path');
+const { log } = console;
+
+const fileName = path.join(__dirname, 'assets/info.txt');
+const config = {
+    encoding: 'UTF-8'
+};
+
+//create Read stream
+const inputStream = fs.createReadStream(fileName, config);
+
+//starts attaching listerners
+//data event is emitted by os for each chunk of data
+
+let data = '';
+inputStream.on('data', chunk => {
+    log(`Received ${chunk.length} bytes of data.`)
+    //log(chunk)
+    data += chunk;
+})
+
+//end event is called , no more chunk of data is availble.
+inputStream.on('end', () => {
+    log('end is called');
+    log(data);
+})
+
+//error event: for error handling
+inputStream.on('error', err => {
+    log('error')
+});
+
+const fs = require('fs');
+const path = require('path');
+
+const fileName = path.join(__dirname, 'assets/grains.txt');
+
+const config = {
+    encoding: 'utf8',
+    flag: 'w'
+};
+const grains = ['wheat', 'rice', 'oats'];
+
+const outputStream = fs.createWriteStream(fileName, config);
+
+while (grains.length) {
+    let data = grains.pop() + " ";
+    outputStream.write(data);
+    console.log("Wrote: %s", data);
+}
+outputStream.close();
+
+outputStream.on('close', function () {
+    console.log('file has been closed ')
+});
+
+******************************************************************************************
+
+How to read from one file and write into file? ===> Read + Write:
+.................................................................
+
+//Read + write : simple eg:
+//read + write
+const fs = require('fs');
+const path = require('path');
+
+//read
+const inputfileName = path.join(__dirname, 'assets/info.txt');
+//write
+const outputFileName = path.join(__dirname, 'assets/greeter.txt');
+
+const config = {
+    encoding: 'UTF-8'
+}
+
+const inputStream = fs.createReadStream(inputfileName, config);
+const outputStream = fs.createWriteStream(outputFileName, config);
+
+//Register data event.
+inputStream.on('data', function (chunk) {
+    console.log(`Received ${chunk.length} bytes of data.`);
+    console.log(chunk);
+    //writing data chunk by chunk
+    outputStream.write(chunk);
+});
+
+
+//end event
+inputStream.on('end', function () {
+    console.log('There will be no more data to read!');
+    outputStream.close();
+})
+
+//error event: for error handling
+inputStream.on('error', function (err) {
+    console.log(`Some thing went wrong! ${err}`)
+});
+
+outputStream.on('close', function () {
+    console.log(`File write operation is completed`);
+});
+*************************************************************************************
+Back Pressure: read + write  === read + process +write ===  (f1--f2--f3--)
+............................................................................
+
+
+Back Pressure:
+..............
+Problems when you do read and write together
+
+1. In general read operation is faster than write operation
+
+
+Back Pressure means inputstream is fast, outputstream slow, then data will be
+lost.
+
+
+in order to show back pressure, we need big file.
+
+big file creation code:
+.......................
+
+const fs = require('fs');
+const path = require('path')
+
+const filePath = path.join(__dirname, "assets/big.file")
+const file = fs.createWriteStream(filePath);
+
+for (let i = 0; i <= 1e6; i++) {
+    file.write('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n');
+}
+
+file.end();
 
 
 
+Handling back pressure:
+.......................
+Pause Input stream if the Node Process memory is full(Buffer),resume if buffer/process memory is empty.
+
+stream.pause() if stream is full
+else
+stream.resume() if stream is drain
+
+drain event is called if buffer is empty.
 
 
+const fs = require('fs');
+const path = require('path');
 
+const inputfileName = path.join(__dirname, 'assets/big.file');
+const outputfileName = path.join(__dirname, 'assets/big_copy.file');
 
+const config = {
+    encoding: 'UTF-8'
+}
 
+//Back pressure handling
+const readerStream = fs.createReadStream(inputfileName, config);
+const writeStr = fs.createWriteStream(outputfileName, config);
 
+readerStream.on('data', function (chunk) {
+    console.log(`Received ${chunk.length} bytes of data.`);
 
+    //test if buffer is full or not
+    let buffer_good = writeStr.write(chunk);
 
+    if (!buffer_good) readerStream.pause();
+});
+writeStr.on('drain', function () {
+    console.log('buffer drained!');
+    readerStream.resume();
+});
 
+readerStream.on('end', function () {
+    //console.log(data);
+});
 
+readerStream.on('error', function (err) {
+    console.log(err.stack);
+});
+/////////////////////////////////////////////////////////////////////////////////////////////
 
+read and write without data loss.
+...................................
 
+pipe method : 
+  it is abstraction method for pasue,resume,drain.
 
+const fs = require('fs');
+const path = require('path');
 
+const inputfileName = path.join(__dirname, 'big.file');
+const outputfileName = path.join(__dirname, 'big_copy.file');
 
+const config = {
+      encoding: 'UTF-8'
+}
 
+//Back pressure handling
+const readerStream = fs.createReadStream(inputfileName, config);
+const writeStr = fs.createWriteStream(outputfileName, config);
 
+//backPressure streams
+//pipe method is simplest method which wraps resume,pasuse,drain 
+readerStream.pipe(writeStr);
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Service :
+  return promise where array 
+  convert into json write into file.......
+*********************************************************************************************
 
 
 
