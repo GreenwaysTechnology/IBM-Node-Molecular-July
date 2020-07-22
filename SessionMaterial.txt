@@ -2095,28 +2095,1380 @@ Service :
   return promise where array 
   convert into json write into file.......
 *********************************************************************************************
+Non Blocking Networking:
+
+TCP/IP
+DataGram
+HTTP
+
+
+1.HTTP:
+
+ module is used to communicate http protocal , where we can build web apps.
+
+
+Web Apps in Node:
+................
+
+Tradtional web work flow
+
+Client-----request----------------WebServer--- thread--will io operation.
+Client-----request----------------WebServer----thread--will io operation.
+Client-----request----------------WebServer---thread-- will io operation.
+Client-----request----------------WebServer---thread-- will io operation.
+
+
+
+Non Blocking web model(Node.js):
+...............................
+
+Client-----request------WebServer built by node---|-            will io operation.
+Client-----request------WebServer built by node---|- libvu --os will io operation.
+Client-----request----- WebServer built by node---|-            will io operation.
+Client-----request----- WebServer built by node---|-            will io opeeration
+
+
+node and http 
+node provides http high level api from 'http.js' through module.
+
+
+//create web server
+//create web app
+
+//start the webserver
+
+
+class:http:ServerResponse : output
+class:http:ClientRequest : input
+class:http:Server : handling low level socket operations
+
+HTTP is streaming api, backpressure can be handled, data is chunked.
+
+
+const http = require('http');
+
+const { log } = console;
+
+const port = 3000;
+
+/**
+ * webserver
+ * webapp
+ * deployment
+ */
+//web server and web application
+
+//webapp is represented by funciton - listener /handler function
+//here request and response are just variables holding , the instance of ClientRequest
+//and ServerResponse classes.
+
+//handles client request and response in nonblocking way.
+const httpListener = (request, response) => {
+    //write data into response stream 
+    response.write('<h1>Hello Node Web App!</h1>');
+    //close the current connection
+    response.end();
+
+    //response events
+    response.on('close', () => {
+        //perform something when server is closed
+        log(`Server is closed...`)
+    })
+    response.on('finish', () => {
+        //perform something when server is closed
+        log(`Server has committed response`);
+    })
+
+};
+const server = http.createServer(httpListener);
+
+//server events
+server.on('request', (request, response) => {
+    log(`Client request on  ${new Date()}`)
+});
+
+//start the server
+server.listen(port, () => {
+    log(`Server listens at ${port}`);
+})
+
+
+const http = require('http');
+const TodoService = require('./api/TodoService');
+
+const { log } = console;
+
+//create todo object
+const todoService = new TodoService();
+
+const port = 3000;
+
+const httpListener = async (request, response) => {
+    //write data into response stream 
+    response.writeHead(200, {
+        'Content-Type': 'application/json'
+    });
+    let todos = await todoService.findAllAsyncWithPromise();
+    response.write(JSON.stringify(todos));
+    //close the current connection
+    response.end();
+
+};
+const server = http.createServer(httpListener);
+
+//server events
+server.on('request', (request, response) => {
+    log(`Client request on  ${new Date()}`)
+});
+
+//start the server
+server.listen(port, () => {
+    log(`Server listens at ${port}`);
+})
+**************************************************************************************
+
+const http = require('http');
+const TodoService = require('./api/TodoService');
+
+const { log } = console;
+
+//create todo object
+const todoService = new TodoService();
+const port = 3000;
+
+//request and reponse represents a stream ; duplex stream
+//input and output streams.
+
+const server = http.createServer((request, response) => {
+
+    //echo use case
+    //attach request event - data 
+    let data = '';
+    request.on('data', (chunk) => {
+        log('request event is called')
+        data += chunk;
+    });
+    request.on('end', () => {
+        log(data);
+        response.write(data);
+        response.end();
+    });
+
+});
+
+//server events
+server.on('request', (request, response) => {
+    log(`Client request on  ${new Date()}`)
+});
+
+//start the server
+server.listen(port, () => {
+    log(`Server listens at ${port}`);
+})
+**********************************************************************************************
+
+What if i want to build rest full web services
+
+ -Resource mapping
+  -GET,POST,DELETE,PUT,.....
+  -/api/list
+  -/api/:id
+
+Using core http module, it is very diffcult to build realtime web apps and webservices.
+ why, developers, need to focus resource and url mapping and application.
+
+Solution : frameworks.
+
+there are lot of node based web frameworks available in the market.
+
+*******************************************************************************************
+
+Thrid party modules and npm : node package manager:
+...................................................
+
+node modules types
+1.custom module - discussed
+2.in built modules - disucssed
+3.third party modules - 
+
+npm:   
+ node package manager === mvn
+npm is tool is used to distribute node modules to others
+and you can get node modules from  others.
+
+npm tool is distributed along with node installation
+
+npm uses public repository server called npmjs.com npmjs.org
+
+tools and libs,frameworks all are distributed as node modules into repository.
+
+
+Core concepts of npm :
+
+->used to pull and push node modules into npmjs.com 
+
+Javascript Project Structure:(server side/ client side)
+.........................................................
+
+The project must have two things
+
+1.package.json file :
+   meta file which describes the project information
+2.node_modules folder
+   which contains libs/frameworks/tools code.
+
+
+
+Steps always to create js projects
+
+- create package.json file first
+
+create package.json file
+
+>npm init
+
+
+{
+  "name": "mynode-apps",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Subramanian Murugan",
+  "license": "ISC"
+}
+
+
+npm is used
+
+to install,uninstall,publish node modules from node repo / into node repo.
+
+if you install third party modules , into your project, node distributes npm tool ,using this you can install,uninstall,upgrade node modules.
+
+
+npm syntax:
+
+npm commandName.
+
+where <command> is one of:
+    access, adduser, audit, bin, bugs, c, cache, ci, cit,
+    clean-install, clean-install-test, completion, config,
+    create, ddp, dedupe, deprecate, dist-tag, docs, doctor,
+    edit, explore, fund, get, help, help-search, hook, i, init,
+    install, install-ci-test, install-test, it, link, list, ln,
+    login, logout, ls, org, outdated, owner, pack, ping, prefix,
+    profile, prune, publish, rb, rebuild, repo, restart, root,
+    run, run-script, s, se, search, set, shrinkwrap, star,
+    stars, start, stop, t, team, test, token, tst, un,
+    uninstall, unpublish, unstar, up, update, v, version, view,
+    whoami
+
+node_modules : folder which can hold all javascript modules downloaded from repo.
+
+
+installing module:
+
+>npm install  moduleName  --options
+>npm i moduleName --options
+
+options:
+ --save
+ --save-dev
+ -g
+
+Development
+
+Production
+
+if you are installing any node module, you can tell, do you want to use only for development
+or development + production.
+
+Unit testing libs : Junit.jar===>
+
+ --save = >    development + production
+ --save-dev => only for development
+
+********************************************************************************************
+
+Development and production modules:
+
+1.lodash
+
+npm init -one time
+
+>npm install lodash --save
+
+
+index.js
+
+let util = require('lodash/array');
+//start using lodash
+const array = [1];
+const other = util.concat(array, 2, [3], [[4]]);
+console.log(other);
+
+*********************************************************************************************
+Only Development,Testing
+
+Unit Testing
+E2e Testing
+compilers
+tools 
+
+->npm install module --save-dev
+
+-chai.js
+
+ "dependencies": {
+    "lodash": "^4.17.19"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0"
+  }
+
+npm install --save-dev jasmine
+
+****************************************************************************************
+
+how to uninstall
+
+npm uninstall --save-dev jasmine
+
+
+**********************************************************************************************
+
+Global dependencies:
+
+Tools and Technologies:
+.......................
+
+1.compiler
+2.build system
+3.servers
+4.cli tools to create and manage projects
+
+Tool:
+.....
+1.mocha : server for testing 
+
+
+global modules are installed globally not inside project
+
+ C:\Users\sasub\AppData\Roaming\npm\node_modules\mocha\bin\mocha
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+Automation:
+  Java script automation.
+
+package.json contains "scripts" used for automation.
+
+ "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+
+key:value
+ |       | 
+command  task to be executed
+
+commands:
+
+1.built in commands
+ test,start,stop.....
+   
+"scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+     "start" : "node src/httpserver-1.js"
+  }
+how to execute?
+ > npm start  | npm test
+
+2.user defined commands
+
+command name can be user defined.
+
+subu
+
+"scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/httpserver-1.js",
+    "subu": "node src/httpserver.js "
+  }
+
+How to run?
+npm run subu ; just add run command for user defined commands.
+
+
+how to run /chain multiple "tasks" together using single command?
+  Yes possible ; kindly refer npm scripts section 
+
+Global dependencies and scripts , problems with Global dependencies:
+....................................................................
+
+1.version mismatches for various  projects
+
+
+Soution :
+
+1.install any tools as dev dependency inside project
+
+npm install mocha --save-dev
+
+
+2.can i run mocha like below 
+C:\session\ibm\july\nodems\mynode-apps>mocha
+
+ No! because mocha is not in globally rather in project specfic.
+
+3.how to run mocha command 
+  soultion is Scripts.
+
+  "scripts": {
+    "test": "mocha",
+    "start": "node src/httpserver-1.js",
+    "subu": "node src/httpserver.js "
+  }
+***********************************************************************************************
+Express Js:
+
+create project 
+
+npm init
+
+npm install express --save
+
+
+Express :
+
+1. express is framework built on core http module.
+const express = require('express');
+
+Express core objects:
+
+1.Application
+2.Request
+3.Response
+4.Router
+
+Application is core container object, which contains other objects used to build web apps.
+entry point of express.
+
+Steps;
+
+1.create application object
+
+//create application object
+const app = express();
+
+2.start server
+const port = 3001;
+app.listen(port, () => console.log('Express server is Ready!'));
 
 
 
 
+//get express , returns a function/class ; to create object-application object
+const express = require('express');
+
+const port = 3001;
+
+//create application object
+const app = express();
+
+//Request and Response hanndling : router based -HTTP Method  and url mapping is simpe
+
+//home path
+app.get('/', (request, response) => {
+    response.end('<h1>Welcome to My Application</h1>')
+});
+//TODO API
+app.get('/api/todo/list', (request, response) => {
+    response.end('todo list : get')
+})
+app.post('/api/todo', (request, response) => {
+    response.end('todo list : Post')
+})
+app.delete('/api/todo', (request, response) => {
+    response.end('todo list : delete')
+})
+app.put('/api/todo', (request, response) => {
+    response.end('todo list : puts')
+})
+
+//server starts
+app.listen(port, () => console.log('Express server is Ready!'));
+
+*********************************************************************************************
+Resource mapping:
+
+api 
+  todos
+    -get,post,delete,put
+  users
+   -get,post,delte,put
+  products
+  customers
+
+Express modularity:
+
+ express isloates code via special object called routers.
+
+const express = require('express');
+
+//create Router instance
+const todoRouter = express.Router();
+
+todoRouter.get('/list', (request, response) => {
+    response.end('todo list : get')
+})
+todoRouter.post('/', (request, response) => {
+    response.end('todo list : Post')
+})
+todoRouter.delete('/', (request, response) => {
+    response.end('todo list : delete')
+})
+todoRouter.put('/', (request, response) => {
+    response.end('todo list : puts')
+})
+
+module.exports = todoRouter;
+
+
+const express = require('express');
+const userRouter = express.Router();
+
+userRouter.get('/list', (request, response) => {
+    response.end('users list : get')
+});
+userRouter.post('/', (request, response) => {
+    response.end('users list : Post')
+})
+userRouter.delete('/', (request, response) => {
+    response.end('todo list : delete')
+})
+userRouter.put('/', (request, response) => {
+    response.end('users list : puts')
+})
+
+module.exports = userRouter;
+
+
+//get express , returns a function/class ; to create object-application object
+const express = require('express');
+const todoRouter = require('./routers/todos');
+const userRouter = require('./routers/users')
+
+const port = 3001;
+
+//create application object
+const app = express();
+
+//Link with Routers
+app.use('/api/todos', todoRouter);
+app.use('/api/users', userRouter);
+
+
+//home path
+app.get('/', (request, response) => {
+    response.end('<h1>Welcome to My Application</h1>')
+});
+
+//server starts
+app.listen(port, () => console.log('Express server is Ready!'));
+
+*********************************************************************************************
+
+const express = require('express');
+//const todoservice = require('../services/TodoService');
+const { findAll } = require('../services/TodoService');
+
+//create Router instance
+const todoRouter = express.Router();
+
+todoRouter.get('/list', async (request, response) => {
+    //json
+    // let todos = await todoservice.findAll()
+    let todos = await findAll();
+    response.json(todos);
+
+})
+todoRouter.post('/', (request, response) => {
+    response.end('todo list : Post')
+})
+todoRouter.delete('/', (request, response) => {
+    response.end('todo list : delete')
+})
+todoRouter.put('/', (request, response) => {
+    response.end('todo list : puts')
+})
+
+module.exports = todoRouter;
+
+
+const TODOS = require('../data/todos')
+
+class TodoService {
+    constructor() {
+    }
+    findAll() {
+        return new Promise((resolve, reject) => {
+            setTimeout(resolve, 5000, TODOS)
+        });
+    }
+}
+
+//export object
+module.exports = new TodoService();
+
+***********************************************************************************************
+Middlewares:
+...........
+
+What is middleware?
+ middleware is a javascript function which provides utilties
+
+filters : in java servlets eq middleware.
+
+Express app architecture:
+
+express has two things
+1.URL mapping and request processing : app.get('url')
+2.Routers , to create moduels
+
+
+Extra features 
+1.logging
+2.auth
+3.database
+4.session
+5.data parsing
+6.templates
+etc....................
+
+How to integrate theses features into express app.
+
+express says i can provide only routing,req and response process, if you want anything ,
+with "Middlewares"
+
+Types of middlewares
+1.custom middlewares
+2.third party middlewares
+
+middleware workflows:
+
+client----request---node--server---express application---
+
+			   | ---m1
+			   | --m2
+	express application| ---m3   ----Request Processing(get,post...)
+			   |---m4
+			   | --mn
+
+
+ Note : middleware code is executed before/after request-response handling
+
+
+How to attach middleware with application object /Router level?
+
+app.use(middleware) : middleware registeration at app level : global middlewares
+router.use(middleware) : middleware registeration at module level
+
+
+Types of middlewares based on Use:
+.................................
+Application-level middleware
+  middleware attached at application : global middlewares
+Router-level middleware
+ middleware attached at router level(module) : module specific
+Error-handling middleware
+ for handling global errors
+Built-in middleware
+ provided by express itself
+Third-party middleware
+ provided by others.
+
+Built-in middleware
+ provided by express itself
+
+1.body-parser :
+  which parses client input data into javascript object
+
+ npm install body-parser --save
+
+
+//get express , returns a function/class ; to create object-application object
+const express = require('express');
+const bodyParser = require('body-parser')
+
+const port = 3001;
+
+const { log } = console;
+//create application object
+const app = express();
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+
+// parse application/json
+app.use(bodyParser.json())
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//home path
+app.get('/', (request, response) => {
+    response.end('<h1>Welcome to My Application</h1>')
+});
+//request payload
+app.post('/api/greet', (request, response) => {
+    // let data = '';
+    // request.on('data', (chunk) => {
+    //     log('request event is called')
+    //     data += chunk;
+    // });
+    // request.on('end', () => {
+    //     log(data);
+    //     response.end(data);
+    // });
+
+    let data = request.body;
+    log(data);
+    response.json(data);
+
+
+})
+
+//server starts
+app.listen(port, () => console.log('Express server is Ready!'));
+///////////////////////////////////////////////////////////////////////////////////////////
+
+custom middleware:
+ -app level
+ -app level with url mapping ,http methods
+ -router level
+ -router url mapping
+
+i want to call middlware for whole application irrespective of routers,urls,methods.
+  -global middlewares
+
+middleware is function , takes 3 args - req,res,next
+next is function used to move the middleware from one to another .
+ 
+ req -- m1-next--m2-next-m3-next-mN - response
+
+
+//get express , returns a function/class ; to create object-application object
+const express = require('express');
+const bodyParser = require('body-parser')
+const todoRouter = require('./routers/todos');
+
+
+const port = 3001;
+
+const { log } = console;
+//create application object
+const app = express();
+
+////////////////////////////////////////////////////////////////////////////////
+//custom global middleware
+app.use((req, res, next) => {
+    //middleware logic
+    log(`Request received from ${req.url} on ${req.method}`)
+    //at end you have to call
+    next();
+});
+////////////////////////////////////////////////////////////////
+app.use('/api/todos', todoRouter);
+////////////////////////////////////////////////////////////////////////////////
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+
+// parse application/json
+app.use(bodyParser.json())
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//home path
+app.get('/', (request, response) => {
+    response.end('<h1>Welcome to My Application</h1>')
+});
+//request payload
+app.post('/api/greet', (request, response) => {
+    // let data = '';
+    // request.on('data', (chunk) => {
+    //     log('request event is called')
+    //     data += chunk;
+    // });
+    // request.on('end', () => {
+    //     log(data);
+    //     response.end(data);
+    // });
+
+    let data = request.body;
+    log(data);
+    response.json(data);
+
+
+})
+
+//server starts
+app.listen(port, () => console.log('Express server is Ready!'));
+
+****************************************************************************************
+
+
+const express = require('express');
+//const todoservice = require('../services/TodoService');
+const { findAll } = require('../services/TodoService');
+
+//create Router instance
+const todoRouter = express.Router();
+
+todoRouter.use((req, res, next) => {
+    //middleware logic
+    console.log(`todos middleware called`)
+    //at end you have to call
+    next();
+});
+
+todoRouter.get('/list', async (request, response) => {
+    //json
+    // let todos = await todoservice.findAll()
+    let todos = await findAll();
+    response.json(todos);
+
+})
+todoRouter.post('/', (request, response) => {
+    response.end('todo list : Post')
+})
+todoRouter.delete('/', (request, response) => {
+    response.end('todo list : delete')
+})
+todoRouter.put('/', (request, response) => {
+    response.end('todo list : puts')
+})
+
+module.exports = todoRouter;
+
+*********************************************************************************************
+
+Data base integration with express:
+..................................
+
+mongodb driver
+
+npm install mongojs
+
+
+ProductService
+const db = require('../connection');
+
+class ProductService {
+    constructor() {
+    }
+    findAll() {
+        return new Promise((resolve, reject) => {
+            const products = db.collection('products');
+            //query monogodb
+            products.find((err, docs) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(docs);
+            })
+        });
+    }
+}
+
+//export object
+module.exports = new ProductService();
+
+*******************************************************************************
+
+src/connection.js
+
+
+const mongojs = require('mongojs');
+
+const db = mongojs('Myproductsdb1')
+module.exports = db;
+
+******************************************************************************************
+
+productrouter.js
+
+
+
+const express = require('express');
+const { response } = require('express');
+const { findAll } = require('../services/ProductService');
+
+const productRouter = express.Router();
+
+productRouter.get('/list', async (request, response) => {
+    let products = await findAll();
+    response.json(products);
+});
+
+module.exports = productRouter;
+
+
+
+******************************************************************************************************
+app.js
+
+//get express , returns a function/class ; to create object-application object
+const express = require('express');
+const todoRouter = require('./routers/todos');
+const userRouter = require('./routers/users')
+const productRouter =require('./routers/products');
+
+
+const port = 3001;
+
+//create application object
+const app = express();
+
+//Link with Routers
+app.use('/api/todos', todoRouter);
+app.use('/api/users', userRouter);
+app.use('/api/products', productRouter);
+
+//home path
+app.get('/', (request, response) => {
+    response.end('<h1>Welcome Product Application</h1>')
+});
+
+//server starts
+app.listen(port, () => console.log('Express server is Ready!'));
+
+******************************************************************************************
+
+TCP/IP,DNS,UDP
+.............
+
+TCP/IP:
+ -net modules.
+
+server.js
+// Include Nodejs' net module.
+const Net = require('net');
+// The port on which the server is listening.
+const port = 1337;
+
+// Create a new TCP server.
+const server = new Net.Server();
+
+server.listen(port,function(){
+    console.log(`Server listening for connection requests on socket localhost:${port}`);
+});
+// When a client requests a connection with the server, the server creates a new
+// socket dedicated to that client.
+// When a client requests a connection with the server, the server creates a new
+// socket dedicated to that client.
+server.on('connection', function(socket) {
+    console.log('A new connection has been established.');
+
+    // Now that a TCP connection has been established, the server can send data to
+    // the client by writing to its socket.
+    socket.write('Hello, client.');
+
+    
+    // // The server can also receive data from the client by reading from its socket.
+    socket.on('data',function(chunk){
+            console.log(`Data received from client: ${chunk.toString()}`);
+    });
+
+      // When the client requests to end the TCP connection with the server, the server
+    // ends the connection.
+    socket.on('end', function() {
+        console.log('Closing connection with the client');
+    });
+
+    // Don't forget to catch error, for your own sake.
+    socket.on('error', function(err) {
+        console.log(`Error: ${err}`);
+    });
+  
+});
+
+client.js
+var net = require('net');
+
+var client = new net.Socket();
+
+client.connect(1337, 'localhost', function() {
+	console.log('Connected');
+	client.write('Hello, server! Love, Client.');
+});
+
+client.on('data', function(data) {
+	console.log('Received: ' + data);
+	client.destroy(); // kill client after server's response
+});
+
+client.on('close', function() {
+	console.log('Connection closed');
+});
+**********************************************************************************************
+
+DNS ACCESS:
+
+const dns = require('dns');  
+
+dns.resolve4('www.google.com', (err, addresses) => {  
+  if (err) throw err;  
+  console.log(`addresses: ${JSON.stringify(addresses)}`);  
+  addresses.forEach((a) => {  
+    dns.reverse(a, (err, hostnames) => {  
+      if (err) {  
+        throw err;  
+      }  
+      console.log(`reverse for ${a}: ${JSON.stringify(hostnames)}`);  
+    });  
+  });  
+});  
+********************************************************************************************
+
+MicroServices on Node JS:
+.........................
+
+What is Micro service?
+
+ Micro service is one of software enginerring principle
+ to build distributed application.
+
+ Microservice is one of software architecture pattern
+ to build distribtued applications
+
+Distributed Applications:
+
+The components(parts) of the application is distributed across different machines. 
+They communicate each other to exchange data.
+
+Distributed application dev patterns:
+....................................
+
+1.Monolithic architecture
+2.Microservice architecture
+
+
+1.Monolithic architecture
+
+The application is developed and deployed as single Java WAR/EAR/JAR file.
+a single directory hierarchy of Rails or NodeJS code
+
+Single dev,testing,deployment.
+
+Draw backs:
+
+1.what if i want to deliver project to end clients module by module at period intervals
+
+2.Vendor lock in
+   if you select one technolgy like java /mysql, the whole application must be in java only.
+   polyglot not possible.
+3.Scalablity 
+   If you want dev/enchance your application based on modern biz needs, it is difficult
+etc...
+
+Micro service :
+
+ Break the whole application into a "separate application"
+
+Each application can be develped,tested, deployed separatly 
+  Domain driven design : Build application based on domain only not for technology 
+  SOLID 
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Micro Service :
+
+  As a developer , you have to concentrate lot of things.
+
+1. coding
+2. infra structure 
+    ->How to manage source code repo :git /svn /bit bucket
+    ->How to work with CI/CD 
+    ->Deployments
+         Dockers,KB....
+    ->Communication infra
+        ->RPI
+        ->Messaging : MOM
+	->domain specific : TCP/IP ,HTTP,SMTP
+   ->Software Registry
+       ->Service registry
+       ->Service discovery
+   ->API Gateways
+
+   ->Reliability
+	->Fallabck
+        -circuiteBreaker
+
+Observability /Management
+	->Log aggregation	
+	Application metrics
+	Audit logging
+	Distributed tracing
+	Exception tracking
+	Health check API
+	Log deployments and changes
+
+  Security
+       token
+
+Centeralized configuration
+
+DataBase,Transaction
+.............................................................................................
+Microservice implementations stack:
+
+Today most of the languges provide ms architecture implemenation.
+
+Java frameworks:
+
+1.Microservices with Spring : Spring Cloud Project
+2.Eclipse Vert.x
+3.Eclipse MicroProfile
+etc....
+
+Javascript frameworks: node based framework
+
+1.Moleculer
+2.Seneca
+3.nonoservices
+
+//////////////////////////////////////////////////////////////////////////////////////////
+                                          Moleculer js
+				(Progressive Microservice Framework)
+
+What is Moleculer?
+
+Moleculer is a fast, modern and powerful microservices framework for Node.js.
+
+It helps you to build efficient, reliable & scalable services.
+
+Moleculer provides many features for building and managing your microservices.
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+How to start with Molecular Project?
+
+
+1.setup from begining
+2.setup using molecular-cli
+
+
+Setup:1.setup from begining
+
+mkdir moleculer-simple
+
+2.npm init
+
+3.npm install moleculer
+
+
+Core Concepts:
+..............
+
+1.Service
+ A service is a simple JavaScript module containing some part of a complex application. 
+ A service represents a biz logic in your application.
+eg: orderService,paymentservice,invoiceservice......
+
+2.Service Broker : == Spring Container
+ Service Broker is the heart of Moleculer.
+
+ It is responsible for management and communication between services (local and remote). 
+ Each node must have an instance of Service Broker.
+
+          "Service Broker is one single Node instance - Node runtime"
+
+
+		         Service1 -- Service 2 Service N
+                                     |
+                    		 --------------
+				 Service Broker
+				     |
+                                  Node Runtime
+
+..............................................................................................
+
+Use case 1 : How to create Simple Service, deploy on Service Broker,How to Test?
 
 
 
 
+/**
+ * Greeter Service 
+ * 
+ * ServiceBroker represents Moleculer Runtime.
+ */
+//Get The ServiceBroker class
+const { ServiceBroker } = require('moleculer')
+
+//create ServiceBroker object
+const broker = new ServiceBroker();
+
+//service   creation : broker.createService(serviceSchema)
+//serviceschema is object which defines properties and methods of service.
+broker.createService({
+    name: 'hello',
+    actions: {
+        sayHello(){
+            return 'Hello Molecular!'
+        }
+    }
+});
+
+
+//start process: broker-Runtime
+broker.start();
+
+The schema has some main parts: 
+	name, version, settings, actions, methods, events.
+
+How to invoke/call Service methods?
+
+There are many ways
+
+1.By using broker.start method
+2.By using  REPL cli
+3.By using another service => Service to Service calls
+
+
+When can you call service method/ When can you service?
+
+ Broker(Server/Process) must be ready first,then only, you can access services.
+
+log message in the console, says, services have been deployed and ready to use:
+
+2020-07-22T11:23:35.484Z] INFO  laptop-r2tggfdl-12640/$NODE: Service '$node' started.
+[2020-07-22T11:23:35.485Z] INFO  laptop-r2tggfdl-12640/HELLO: Service 'hello' started.
+[2020-07-22T11:23:35.487Z] INFO  laptop-r2tggfdl-12640/BROKER: ✔ ServiceBroker with 2 service(s) is started successfully in 8ms.
+
+
+broker.start() returns Promise, which ensures that , Broker is ready or broker throws
+error(not ready.
+
+
+Calling services methods
+.......................
+
+broker.call('serviceName.methodName')
 
 
 
+/**
+ * Greeter Service 
+ * 
+ * ServiceBroker represents Moleculer Runtime.
+ */
+//Get The ServiceBroker class
+const { ServiceBroker } = require('moleculer')
+
+//create ServiceBroker object
+const broker = new ServiceBroker();
+
+//service   creation : broker.createService(serviceSchema)
+//serviceschema is object which defines properties and methods of service.
+broker.createService({
+    name: 'hello',
+    actions: {
+        sayHello() {
+            return 'Hello Molecular!'
+        }
+    }
+});
 
 
+//start process: broker-Runtime
+broker.start()
+    .then(res => {
+        //any code , after broker ready
+        console.log('broker is ready now , do something, interact with service')
+        //call service methods and get result
+        broker.call('hello.sayHello')
+            .then(message => { console.log(message) })
+            .catch(err => console.log('Service error ', err));
+    })
+    .catch(err => {
+        console.log(err);
+    })
+    .finally(() => {
+        console.log('Service broker has done')
+    })
 
+broker.start()=>Promise|--->Resoloved---->broker.call()-->Promise--->Result
+                     |                                      |
+		  Rejected                                  Rejected
+			Server/Broker failed                   Service Failed
 
+Async await version:
+....................
+async function start() {
+    try {
+        await broker.start();
+        let message = await broker.call('hello.sayHello');
+        console.log(message);
+    }
+    catch (err) {
+        console.log(err);
+    }
+    finally {
+        console.log('done!!!')
+    }
+}
+start();
 
+********************************************************************************************
 
+Two Services:
 
+/**
+ * Greeter Service 
+ * 
+ * ServiceBroker represents Moleculer Runtime.
+ */
+//Get The ServiceBroker class
+const { ServiceBroker } = require('moleculer')
 
+//create ServiceBroker object
+const broker = new ServiceBroker();
 
+//service   creation : broker.createService(serviceSchema)
+//serviceschema is object which defines properties and methods of service.
+broker.createService({
+    name: 'hello',
+    actions: {
+        sayHello() {
+            return 'Hello Molecular!'
+        }
+    }
+});
 
+broker.createService({
+    name: 'hai',
+    actions: {
+        sayHai() {
+            return 'Hai Molecular!'
+        }
+    }
+});
 
-
-
+async function start() {
+    try {
+        await broker.start();
+        let helloMessage = await broker.call('hello.sayHello');
+        let haiMessage = await broker.call('hai.sayHai')
+        console.log(` Hello ${helloMessage} Hai ${haiMessage}`);
+    }
+    catch (err) {
+        console.log(err);
+    }
+    finally {
+        console.log('done!!!')
+    }
+}
+start();
 
